@@ -1,6 +1,7 @@
 # Simple Json Search Demo
 
-## Standalone
+## Client
 
+## Server
 
 ## Separation of Query and Index
