@@ -34,6 +34,8 @@ class BaseIndex(object):
 	def list(self, table_name=None):
 		if table_name is None:
 			return self.indices.keys()
+		else:
+			return self.indices[table_name]
 
 	def index_document(self, table_name, index_name, token, document, uid=None):
 		pass
