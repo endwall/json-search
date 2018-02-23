@@ -4,3 +4,4 @@ flake8_*
 nosetests.xml
 venv
 data
+*.pyc
