@@ -5,7 +5,7 @@ from nose.tools import raises
 import hashlib
 import json
 
-from client.jsearch.search_index import BaseIndex, UntokenizedSearchIndex
+from client.jsearch.base_search_index import BaseIndex
 
 class TestBaseIndex(TestCase):
     """Test the BaseIndex module."""
@@ -13,7 +13,7 @@ class TestBaseIndex(TestCase):
     def setUp(self):
         """Do setup."""
 
-    @patch('client.jsearch.search_index.BaseIndex._loads')
+    @patch('client.jsearch.base_search_index.BaseIndex._loads')
     def test_init_without_dumps(self, mock_loads):
         base_index = BaseIndex()
         self.assertTrue(mock_loads.called)
@@ -21,10 +21,10 @@ class TestBaseIndex(TestCase):
         self.assertEqual(base_index.indices, {})
         self.assertEqual(base_index.document_dict, {})
 
-    @patch('client.jsearch.search_index.pickle.load')
-    @patch('client.jsearch.search_index.json.load')
-    @patch('client.jsearch.search_index.open')
-    @patch('client.jsearch.search_index.os.path.isfile')
+    @patch('client.jsearch.base_search_index.pickle.load')
+    @patch('client.jsearch.base_search_index.json.load')
+    @patch('client.jsearch.base_search_index.open')
+    @patch('client.jsearch.base_search_index.os.path.isfile')
     def test_loads(self, mock_isfile, mock_open, mock_json_load, mock_pickle_load):
         mock_isfile.return_value = True
         mock_open.side_effect = [
@@ -60,9 +60,9 @@ class TestBaseIndex(TestCase):
         self.assertEqual(base_index.indices.keys()[0], 'user')
         self.assertEqual(base_index.indices['user'], pickle_loads[1])
 
-    @patch('client.jsearch.search_index.pickle.dump')
-    @patch('client.jsearch.search_index.open')
-    @patch('client.jsearch.search_index.BaseIndex._loads')
+    @patch('client.jsearch.base_search_index.pickle.dump')
+    @patch('client.jsearch.base_search_index.open')
+    @patch('client.jsearch.base_search_index.BaseIndex._loads')
     def test_dump_indices(self, mock_index_loads, mock_open, mock_pickle_dump):
         base_index = BaseIndex()
         pickle_dumps = [
@@ -90,9 +90,9 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_pickle_dump.called)
         self.assertEqual(base_index.index_meta, {'tables': {'user': './data/user.idx'}})
 
-    @patch('client.jsearch.search_index.pickle.dump')
-    @patch('client.jsearch.search_index.open')
-    @patch('client.jsearch.search_index.BaseIndex._loads')
+    @patch('client.jsearch.base_search_index.pickle.dump')
+    @patch('client.jsearch.base_search_index.open')
+    @patch('client.jsearch.base_search_index.BaseIndex._loads')
     def test_dump_docs(self, mock_index_loads, mock_open, mock_pickle_dump):
         base_index = BaseIndex()
         pickle_dumps = [
@@ -120,9 +120,9 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_pickle_dump.called)
         self.assertEqual(base_index.index_meta, {'doc': './data/doc.dat'})
 
-    @patch('client.jsearch.search_index.json.dump')
-    @patch('client.jsearch.search_index.open')
-    @patch('client.jsearch.search_index.BaseIndex._loads')
+    @patch('client.jsearch.base_search_index.json.dump')
+    @patch('client.jsearch.base_search_index.open')
+    @patch('client.jsearch.base_search_index.BaseIndex._loads')
     def test_dump_indices_meta(self, mock_index_loads, mock_open, mock_json_dump):
         base_index = BaseIndex()
         base_index.index_meta =  {
@@ -139,7 +139,7 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_open.called)
         self.assertTrue(mock_json_dump.called)
 
-    @patch('client.jsearch.search_index.BaseIndex._loads')
+    @patch('client.jsearch.base_search_index.BaseIndex._loads')
     def test_update_document(self, mock_index_loads):
         base_index = BaseIndex()
         base_index.document_dict = {
@@ -160,41 +160,3 @@ class TestBaseIndex(TestCase):
         }
         base_index.update_document(table_name='organization', uid='222', document=new_org_doc)
         self.assertEqual(base_index.document_dict, expected)
-
-class TestUntokenizedSearchIndex(TestCase):
-
-    @patch('client.jsearch.search_index.UntokenizedSearchIndex._loads')
-    def setUp(self, mock_index_loads):
-        """Do setup."""
-        self.search_index = UntokenizedSearchIndex()
-        self.search_index.indices = {
-            'user': {
-                'email': {
-                    'abc@g.com': '123hash'
-                }
-            }
-        }
-        self.search_index.document_dict = {
-            'user': {
-                '123hash': {'email': 'abc@g.com'}
-            }
-        }
-
-    def test_index_document(self):
-        doc = {
-            'email': 'aaa@h.com'
-        }
-        uid = hashlib.md5(json.dumps(doc, sort_keys=True)).hexdigest()
-        self.search_index.index_document(table_name='user', index_name='email', token='aaa@h.com', document=doc)
-        print self.search_index.indices
-        self.assertEqual(self.search_index.indices, {
-            'user': {'email': {
-                'abc@g.com': '123hash',
-                'aaa@h.com': uid
-            }}
-        })
-
-    def test_search(self):
-        query = 'abc@g.com'
-        result = self.search_index.search(table_name='user', index_name='email', token=query)
-        print result
