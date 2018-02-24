@@ -52,23 +52,31 @@ class BaseIndex(object):
 				    self.indices[table] = pickle.load(table_file)
 
 	def dumps(self):
-		meta_file = self.data_path + self.META_FILE
+		self.index_meta = {}
+		self._dump_indices()
+		self._dump_docs()
+		self._dump_indices_meta()
+
+	def _dump_indices(self):
 		self.index_meta['tables'] = {}
 		for table in self.indices:
 			print("dump index: " + table)
-			output_file = open(self.data_path + table + '.idx', 'wb')
-			pickle.dump(self.indices[table], output_file)
-			output_file.close()
+			with open(self.data_path + table + '.idx', 'wb') as output_file:
+				pickle.dump(self.indices[table], output_file)
 			self.index_meta['tables'][table] = self.data_path + table + '.idx'
-		output_file = open(self.data_path + 'doc.dat', 'wb')
-		pickle.dump(self.document_dict, output_file)
-		output_file.close()
+
+	def _dump_docs(self):
+		self.index_meta['doc'] = {}
+		with open(self.data_path + 'doc.dat', 'wb') as output_file:
+			pickle.dump(self.document_dict, output_file)
 		self.index_meta['doc'] = self.data_path + 'doc.dat'
-		print(self.index_meta)
+
+	def _dump_indices_meta(self):
+		meta_file = self.data_path + self.META_FILE
 		with open(meta_file, 'wb') as outfile:
 			json.dump(self.index_meta, outfile)		
 
-	def update_documents(self, table_name, uid, document):
+	def update_document(self, table_name, uid, document):
 		if table_name not in self.document_dict:
 			self.document_dict[table_name] = {}
 		self.document_dict[table_name][uid] = document
@@ -90,7 +98,7 @@ class UntokenizedSearchIndex(BaseIndex):
 		if _uid is None:
 			_uid = hashlib.md5(json.dumps(document, sort_keys=True)).hexdigest()
 		current_index[token].append(_uid)
-		self.update_documents(table_name=table_name, uid = _uid, document = document)
+		self.update_document(table_name=table_name, uid = _uid, document = document)
 
 	def search(self, table_name, index_name, token):
 		doc_uid_list = []

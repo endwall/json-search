@@ -36,7 +36,7 @@ class TestBaseIndex(TestCase):
                 'user': './data/user.idx'
             }
         }
-        mock_pickle_load.side_effect = [
+        pickle_loads = [
             {
                 'user': {
                     '123': {'email': 'test@email'}
@@ -48,6 +48,7 @@ class TestBaseIndex(TestCase):
                 }
             }
         ]
+        mock_pickle_load.side_effect = pickle_loads
         base_index = BaseIndex()
         self.assertTrue(mock_isfile.called)
         self.assertEqual(mock_isfile.call_args, call('./data/meta.json'))
@@ -55,4 +56,105 @@ class TestBaseIndex(TestCase):
         self.assertEqual(mock_pickle_load.call_count, 2)
         self.assertEqual(base_index.index_meta, mock_json_load.return_value)
         self.assertEqual(base_index.indices.keys()[0], 'user')
-        self.assertEqual(base_index.indices['user'], {'email': {'test@email' : '123'}})
+        self.assertEqual(base_index.indices['user'], pickle_loads[1])
+
+    @patch('client.jsearch.search_index.pickle.dump')
+    @patch('client.jsearch.search_index.open')
+    @patch('client.jsearch.search_index.BaseIndex._loads')
+    def test_dump_indices(self, mock_index_loads, mock_open, mock_pickle_dump):
+        base_index = BaseIndex()
+        pickle_dumps = [
+            {
+                'user': {
+                    '123': {'email': 'test@email'}
+                }
+            },
+            {
+                'email': {
+                    'test@email' : '123'
+                }
+            }
+        ]
+        base_index.indices = {
+            'user': {
+                '123': {'email': 'test@email'}
+            }
+        }
+        indices_file = MagicMock(spec=file)
+        mock_open.return_value(indices_file)
+        base_index._dump_indices()
+
+        self.assertTrue(mock_open.called)
+        self.assertTrue(mock_pickle_dump.called)
+        self.assertEqual(base_index.index_meta, {'tables': {'user': './data/user.idx'}})
+
+    @patch('client.jsearch.search_index.pickle.dump')
+    @patch('client.jsearch.search_index.open')
+    @patch('client.jsearch.search_index.BaseIndex._loads')
+    def test_dump_docs(self, mock_index_loads, mock_open, mock_pickle_dump):
+        base_index = BaseIndex()
+        pickle_dumps = [
+            {
+                'user': {
+                    '123': {'email': 'test@email'}
+                }
+            },
+            {
+                'email': {
+                    'test@email' : '123'
+                }
+            }
+        ]
+        base_index.indices = {
+            'user': {
+                '123': {'email': 'test@email'}
+            }
+        }
+        indices_file = MagicMock(spec=file)
+        mock_open.return_value(indices_file)
+        base_index._dump_docs()
+
+        self.assertTrue(mock_open.called)
+        self.assertTrue(mock_pickle_dump.called)
+        self.assertEqual(base_index.index_meta, {'doc': './data/doc.dat'})
+
+    @patch('client.jsearch.search_index.json.dump')
+    @patch('client.jsearch.search_index.open')
+    @patch('client.jsearch.search_index.BaseIndex._loads')
+    def test_dump_indices_meta(self, mock_index_loads, mock_open, mock_json_dump):
+        base_index = BaseIndex()
+        base_index.index_meta =  {
+           'doc': './data/doc.dat',
+            'tables': {
+                'user': './data/user.idx'
+            }
+        }
+
+        indices_meta_file = MagicMock(spec=file)
+        mock_open.return_value(indices_meta_file)
+        base_index._dump_indices_meta()
+
+        self.assertTrue(mock_open.called)
+        self.assertTrue(mock_json_dump.called)
+
+    @patch('client.jsearch.search_index.BaseIndex._loads')
+    def test_update_document(self, mock_index_loads):
+        base_index = BaseIndex()
+        base_index.document_dict = {
+            'user': {
+                '123': {'email': 'test@email'}
+            }
+        }
+        new_org_doc = {
+            'org_name': 'abc'
+        }
+        expected = {
+            'user': {
+                '123': {'email': 'test@email'}
+            },
+            'organization': {
+                '222': {'org_name': 'abc'}
+            }
+        }
+        base_index.update_document(table_name='organization', uid='222', document=new_org_doc)
+        self.assertEqual(base_index.document_dict, expected)
