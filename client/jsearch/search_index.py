@@ -97,7 +97,7 @@ class UntokenizedSearchIndex(BaseIndex):
 
 		if _uid is None:
 			_uid = hashlib.md5(json.dumps(document, sort_keys=True)).hexdigest()
-		current_index[token].append(_uid)
+		current_index[token]=_uid
 		self.update_document(table_name=table_name, uid = _uid, document = document)
 
 	def search(self, table_name, index_name, token):

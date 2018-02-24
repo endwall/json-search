@@ -2,6 +2,8 @@ from unittest import TestCase
 
 from mock import MagicMock, call, patch
 from nose.tools import raises
+import hashlib
+import json
 
 from client.jsearch.search_index import BaseIndex, UntokenizedSearchIndex
 
@@ -158,3 +160,41 @@ class TestBaseIndex(TestCase):
         }
         base_index.update_document(table_name='organization', uid='222', document=new_org_doc)
         self.assertEqual(base_index.document_dict, expected)
+
+class TestUntokenizedSearchIndex(TestCase):
+
+    @patch('client.jsearch.search_index.UntokenizedSearchIndex._loads')
+    def setUp(self, mock_index_loads):
+        """Do setup."""
+        self.search_index = UntokenizedSearchIndex()
+        self.search_index.indices = {
+            'user': {
+                'email': {
+                    'abc@g.com': '123hash'
+                }
+            }
+        }
+        self.search_index.document_dict = {
+            'user': {
+                '123hash': {'email': 'abc@g.com'}
+            }
+        }
+
+    def test_index_document(self):
+        doc = {
+            'email': 'aaa@h.com'
+        }
+        uid = hashlib.md5(json.dumps(doc, sort_keys=True)).hexdigest()
+        self.search_index.index_document(table_name='user', index_name='email', token='aaa@h.com', document=doc)
+        print self.search_index.indices
+        self.assertEqual(self.search_index.indices, {
+            'user': {'email': {
+                'abc@g.com': '123hash',
+                'aaa@h.com': uid
+            }}
+        })
+
+    def test_search(self):
+        query = 'abc@g.com'
+        result = self.search_index.search(table_name='user', index_name='email', token=query)
+        print result
