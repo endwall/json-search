@@ -14,9 +14,7 @@ class BaseIndex(object):
 		self.index_meta = {}
 		self.indices = {}
 		self.document_dict = {}
-		if os.path.lexists(dest + self.META_FILE):
-			self.index_meta = json.loads(open(dest + self.META_FILE).read())
-			self._loads()
+		self._loads()
 
 	def add_table(self, table_name):
 		self.indices[table_name] = {}
@@ -44,11 +42,14 @@ class BaseIndex(object):
 		pass
 
 	def _loads(self):
-		with open(self.index_meta['doc']) as doc_file:
-			self.document_dict = pickle.load(doc_file)
-		for table in self.index_meta['tables']:
-			with open(self.index_meta['tables'][table]) as table_file:
-			    self.indices[table] = pickle.load(table_file)
+		if os.path.isfile(self.data_path + self.META_FILE):
+			with open(self.data_path + self.META_FILE, 'r') as meta_file:
+				self.index_meta = json.load(meta_file)
+			with open(self.index_meta['doc']) as doc_file:
+				self.document_dict = pickle.load(doc_file)
+			for table in self.index_meta['tables']:
+				with open(self.index_meta['tables'][table]) as table_file:
+				    self.indices[table] = pickle.load(table_file)
 
 	def dumps(self):
 		meta_file = self.data_path + self.META_FILE
@@ -59,13 +60,18 @@ class BaseIndex(object):
 			pickle.dump(self.indices[table], output_file)
 			output_file.close()
 			self.index_meta['tables'][table] = self.data_path + table + '.idx'
-		output_file = open(self.data_path + table + '.dat', 'wb')
+		output_file = open(self.data_path + 'doc.dat', 'wb')
 		pickle.dump(self.document_dict, output_file)
 		output_file.close()
-		self.index_meta['doc'] = self.data_path + table + '.dat'
+		self.index_meta['doc'] = self.data_path + 'doc.dat'
 		print(self.index_meta)
 		with open(meta_file, 'wb') as outfile:
 			json.dump(self.index_meta, outfile)		
+
+	def update_documents(self, table_name, uid, document):
+		if table_name not in self.document_dict:
+			self.document_dict[table_name] = {}
+		self.document_dict[table_name][uid] = document
 
 class UntokenizedSearchIndex(BaseIndex):
 	def index_document(self, table_name, index_name, token, document, uid=None):
@@ -84,7 +90,7 @@ class UntokenizedSearchIndex(BaseIndex):
 		if _uid is None:
 			_uid = hashlib.md5(json.dumps(document, sort_keys=True)).hexdigest()
 		current_index[token].append(_uid)
-		self.document_dict[_uid] = document
+		self.update_documents(table_name=table_name, uid = _uid, document = document)
 
 	def search(self, table_name, index_name, token):
 		doc_uid_list = []
@@ -92,6 +98,6 @@ class UntokenizedSearchIndex(BaseIndex):
 		if token in self.indices[table_name][index_name]:
 			doc_uid_list = self.indices[table_name][index_name][token]
 		for doc_uid in doc_uid_list:
-			result.append(self.document_dict[doc_uid])
+			result.append(self.document_dict[table_name][doc_uid])
 		return result
 	
