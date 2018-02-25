@@ -9,7 +9,7 @@ There is no dependency between them, however they are related to the json index/
 
 ## Solution
 search can be very complicated. Things need to be considered at least:
-- Natural Langurage Process
+- Natural Langurage Processing
 - Information Retrival
 It is a combination of engineering and algorithms.
 
@@ -27,8 +27,10 @@ Given a query, search against a search Table and Index.
 
 ## Client
 [Json-search](client/README.md)
+
 ## Server
 This is a ELK docker solution. 
 logstash config has been changed so that it can index organization/user/ticket json files.
+
 [ELK docker-compose](https://github.com/deviantony/docker-elk)
 ## Separation of Query and Index
