@@ -35,4 +35,3 @@ This is a ELK docker solution.
 logstash config has been changed so that it can index organization/user/ticket json files.
 
 Reference: [ELK docker-compose](https://github.com/deviantony/docker-elk)
-## Separation of Query and Index
