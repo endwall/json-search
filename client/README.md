@@ -17,8 +17,10 @@ They are all implemented as Dict (in python) and sortedset which is to make sure
 - More output formats can be added.
 
 ## Usage
+
 ```
 python jsearch/json-search.py --help
+```
 
 ### Index
 Allow inded json files
