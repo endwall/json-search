@@ -1,11 +1,11 @@
+"""Test Case for base search index class."""
+
 from unittest import TestCase
 
 from mock import MagicMock, call, patch
-from nose.tools import raises
-import hashlib
-import json
 
-from client.jsearch.base_search_index import BaseIndex
+from jsearch.base_search_index import BaseIndex
+
 
 class TestBaseIndex(TestCase):
     """Test the BaseIndex module."""
@@ -13,19 +13,21 @@ class TestBaseIndex(TestCase):
     def setUp(self):
         """Do setup."""
 
-    @patch('client.jsearch.base_search_index.BaseIndex._loads')
+    @patch('jsearch.base_search_index.BaseIndex._loads')
     def test_init_without_dumps(self, mock_loads):
+        """Test init w/o any existing indices data."""
         base_index = BaseIndex()
         self.assertTrue(mock_loads.called)
         self.assertEqual(base_index.index_meta, {})
         self.assertEqual(base_index.indices, {})
         self.assertEqual(base_index.document_dict, {})
 
-    @patch('client.jsearch.base_search_index.pickle.load')
-    @patch('client.jsearch.base_search_index.json.load')
-    @patch('client.jsearch.base_search_index.open')
-    @patch('client.jsearch.base_search_index.os.path.isfile')
+    @patch('jsearch.base_search_index.pickle.load')
+    @patch('jsearch.base_search_index.json.load')
+    @patch('jsearch.base_search_index.open')
+    @patch('jsearch.base_search_index.os.path.isfile')
     def test_loads(self, mock_isfile, mock_open, mock_json_load, mock_pickle_load):
+        """Test loading when init."""
         mock_isfile.return_value = True
         mock_open.side_effect = [
             MagicMock(spec=file),
@@ -46,7 +48,7 @@ class TestBaseIndex(TestCase):
             },
             {
                 'email': {
-                    'test@email' : '123'
+                    'test@email': '123'
                 }
             }
         ]
@@ -60,23 +62,12 @@ class TestBaseIndex(TestCase):
         self.assertEqual(base_index.indices.keys()[0], 'user')
         self.assertEqual(base_index.indices['user'], pickle_loads[1])
 
-    @patch('client.jsearch.base_search_index.pickle.dump')
-    @patch('client.jsearch.base_search_index.open')
-    @patch('client.jsearch.base_search_index.BaseIndex._loads')
+    @patch('jsearch.base_search_index.pickle.dump')
+    @patch('jsearch.base_search_index.open')
+    @patch('jsearch.base_search_index.BaseIndex._loads')
     def test_dump_indices(self, mock_index_loads, mock_open, mock_pickle_dump):
+        """Test dumping indices."""
         base_index = BaseIndex()
-        pickle_dumps = [
-            {
-                'user': {
-                    '123': {'email': 'test@email'}
-                }
-            },
-            {
-                'email': {
-                    'test@email' : '123'
-                }
-            }
-        ]
         base_index.indices = {
             'user': {
                 '123': {'email': 'test@email'}
@@ -90,23 +81,12 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_pickle_dump.called)
         self.assertEqual(base_index.index_meta, {'tables': {'user': './data/user.idx'}})
 
-    @patch('client.jsearch.base_search_index.pickle.dump')
-    @patch('client.jsearch.base_search_index.open')
-    @patch('client.jsearch.base_search_index.BaseIndex._loads')
+    @patch('jsearch.base_search_index.pickle.dump')
+    @patch('jsearch.base_search_index.open')
+    @patch('jsearch.base_search_index.BaseIndex._loads')
     def test_dump_docs(self, mock_index_loads, mock_open, mock_pickle_dump):
+        """Test dumping document map."""
         base_index = BaseIndex()
-        pickle_dumps = [
-            {
-                'user': {
-                    '123': {'email': 'test@email'}
-                }
-            },
-            {
-                'email': {
-                    'test@email' : '123'
-                }
-            }
-        ]
         base_index.indices = {
             'user': {
                 '123': {'email': 'test@email'}
@@ -120,13 +100,14 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_pickle_dump.called)
         self.assertEqual(base_index.index_meta, {'doc': './data/doc.dat'})
 
-    @patch('client.jsearch.base_search_index.json.dump')
-    @patch('client.jsearch.base_search_index.open')
-    @patch('client.jsearch.base_search_index.BaseIndex._loads')
+    @patch('jsearch.base_search_index.json.dump')
+    @patch('jsearch.base_search_index.open')
+    @patch('jsearch.base_search_index.BaseIndex._loads')
     def test_dump_indices_meta(self, mock_index_loads, mock_open, mock_json_dump):
+        """Test when dumping indices meta data."""
         base_index = BaseIndex()
-        base_index.index_meta =  {
-           'doc': './data/doc.dat',
+        base_index.index_meta = {
+            'doc': './data/doc.dat',
             'tables': {
                 'user': './data/user.idx'
             }
@@ -139,8 +120,9 @@ class TestBaseIndex(TestCase):
         self.assertTrue(mock_open.called)
         self.assertTrue(mock_json_dump.called)
 
-    @patch('client.jsearch.base_search_index.BaseIndex._loads')
+    @patch('jsearch.base_search_index.BaseIndex._loads')
     def test_update_document(self, mock_index_loads):
+        """Test update document after indexing."""
         base_index = BaseIndex()
         base_index.document_dict = {
             'user': {
