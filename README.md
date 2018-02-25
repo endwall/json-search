@@ -3,9 +3,7 @@
 This is a demo for json documents indexed and searched.
 There are 2 parts
 - Client: A simple json search application
-- Server: An ELK docker stack
-
-There is no dependency between them, however they are related to the json index/search problem.
+- Server: An ELK docker stack (only to show a scalable solution)
 
 ## Solution
 search can be very complicated. Things need to be considered at least:
