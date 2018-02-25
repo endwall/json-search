@@ -33,3 +33,23 @@ This is a ELK docker solution.
 logstash config has been changed so that it can index organization/user/ticket json files.
 
 Reference: [ELK docker-compose](https://github.com/deviantony/docker-elk)
+
+## Project Structure
+### client
+
+```
+client
+  |----- data (persistence of indices)
+  |----- files (json files to be indexed)
+  |----- jsearch (core implementation of json search)
+  |----- tests (unit tests)
+
+```
+
+### Server
+
+server
+  |----- elasticsearch
+  |----- extensions
+  |----- kibana
+  |----- logstash
