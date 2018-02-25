@@ -21,8 +21,7 @@ They are all implemented as Dict (in python) and sortedset which is to make sure
 In client/Makefile, Run
 ```
 make
-make tests
-make lint
+. venv/bin/activate
 ```
 
 ```
@@ -33,6 +32,7 @@ python jsearch/json-search.py --help
 Go to client, run
 ```
 make tests
+make lint
 ```
 ### Index
 Allow inded json files
