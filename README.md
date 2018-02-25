@@ -48,8 +48,10 @@ client
 
 ### Server
 
+```
 server
   |----- elasticsearch
   |----- extensions
   |----- kibana
   |----- logstash
+```
