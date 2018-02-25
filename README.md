@@ -30,6 +30,7 @@ Given a query, search against a search Table and Index.
 
 ## Server
 [ELK Search](server/README.md)
+
 This is a ELK docker solution. 
 logstash config has been changed so that it can index organization/user/ticket json files.
 
