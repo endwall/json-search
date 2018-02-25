@@ -27,12 +27,16 @@ Example:
 python jsearch/json_search.py index -t user -f files/users.json
 ```
 Index data will be dumped to ```client/data``` directory
+
 ### List
 Allow inspect index table schema to know which fields can be searched.
+
 ```
 python jsearch/json_search.py list
 ```
+
 ### Search
+
 Allow search by exact match and return either json or table
 ```
 python jsearch/json_search.py search -t user -f organization_id -q 119 -o table 
