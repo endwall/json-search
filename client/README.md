@@ -44,7 +44,7 @@ Allow search by exact match and return either json or table
 python jsearch/json_search.py search -t user -f organization_id -q 119 -o table 
 ```
 
-## Potentail Issues
+## Potential Issues
 ### Design and operation
 - Separate Query and Index (Refer to ELK)
 - Split Index cross physical machines and add aggregation
