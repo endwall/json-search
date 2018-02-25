@@ -1,4 +1,5 @@
 # Simple Json Search
+A Python Solution
 
 ## Design
 - All search string are not tokenized
@@ -17,11 +18,22 @@ They are all implemented as Dict (in python) and sortedset which is to make sure
 - More output formats can be added.
 
 ## Usage
+In client/Makefile, Run
+```
+make
+make tests
+make lint
+```
 
 ```
 python jsearch/json-search.py --help
 ```
 
+## Tests
+Go to client, run
+```
+make tests
+```
 ### Index
 Allow inded json files
 Example:
